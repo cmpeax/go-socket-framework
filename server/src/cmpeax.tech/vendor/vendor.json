@@ -1,0 +1,23 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "kNtoxGIa3rApgMx/PREQeKqjKw8=",
+			"path": "github.com/axgle/mahonia",
+			"revision": "3358181d7394e26beccfae0ffde05193ef3be33a",
+			"revisionTime": "2018-02-08T00:28:26Z"
+		},
+		{
+			"checksumSHA1": "aBSYu6r0ZvKsFxziggp6JmC6CTc=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "1fbca2aabb09915d4f1006d01b271ad7778eec4f",
+			"revisionTime": "2019-03-15T22:32:36Z"
+		},
+		{
+			"path": "google.golang.org/appengine/cloudsql",
+			"revision": ""
+		}
+	],
+	"rootPath": "cmpeax.tech"
+}

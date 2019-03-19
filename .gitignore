@@ -1,0 +1,6 @@
+server/src/cmpeax.tech/vendor/*
+!server/src/cmpeax.tech/vendor/vendor.json
+*/.DS_Store
+.DS_Store
+server/bin/*
+server/pkg/*
