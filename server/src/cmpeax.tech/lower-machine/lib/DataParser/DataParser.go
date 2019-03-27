@@ -13,9 +13,23 @@ func convertToByte(src string, srcCode string, targetCode string) []byte {
 	return cdata
 }
 
+// func convertToGBK(utfStr string) string {
+// 	var enc mahonia.Encoder
+// 	enc = mahonia.NewEncoder("gbk")
+// 	return enc.ConvertString(utfStr)
+// }
+
 // gbk 转 utf8
 func Parser(responseData string) string {
 	//包一层解析结构的
-	response := convertToByte(responseData, "gbk", "utf8")
+	response := convertToByte(responseData, "gb18030", "utf8")
 	return string(response[:len(response)])
+}
+
+//utf8 转 gbk
+func ParserToGbk(responseData string) string {
+	//包一层解析结构的
+	var enc mahonia.Encoder
+	enc = mahonia.NewEncoder("gbk")
+	return enc.ConvertString(responseData)
 }

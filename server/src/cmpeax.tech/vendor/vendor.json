@@ -15,7 +15,17 @@
 			"revisionTime": "2019-03-15T22:32:36Z"
 		},
 		{
+			"checksumSHA1": "gr0edNJuVv4+olNNZl5ZmwLgscA=",
+			"path": "github.com/gorilla/websocket",
+			"revision": "0ec3d1bd7fe50c503d6df98ee649d81f4857c564",
+			"revisionTime": "2019-03-06T00:42:57Z"
+		},
+		{
 			"path": "google.golang.org/appengine/cloudsql",
+			"revision": ""
+		},
+		{
+			"path": "gorilla/websocket",
 			"revision": ""
 		}
 	],
