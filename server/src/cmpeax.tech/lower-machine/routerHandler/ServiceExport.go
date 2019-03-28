@@ -11,8 +11,8 @@ import (
 	"cmpeax.tech/lower-machine/struct/ACS"
 )
 
-func ServiceExport() map[string]routerDI.CallbackJSONFunc {
-	return map[string]routerDI.CallbackJSONFunc{
+func ServiceExport() routerDI.MapOfCallbackJSONFunc {
+	return routerDI.MapOfCallbackJSONFunc{
 		"0x11": func(jsondata map[string]interface{}, conn net.Conn, db *sql.DB) {
 			fmt.Println("...")
 			rows, err := db.Query("select employeeID,employeeName from validateList")

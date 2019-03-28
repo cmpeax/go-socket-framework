@@ -11,6 +11,13 @@ import (
 	"cmpeax.tech/lower-machine/lib/routerDI"
 )
 
+type SService struct {
+	addr       string
+	routerList routerDI.MapOfCallbackJSONFunc
+	db         *sql.DB
+	devices    map[IPAddress]*DeviceConn
+}
+
 type DeviceConn struct {
 	deviceID     string
 	ipAddress    string
@@ -20,14 +27,9 @@ type DeviceConn struct {
 
 type IPAddress string
 
-type SService struct {
-	addr       string
-	routerList map[string]routerDI.CallbackJSONFunc
-	db         *sql.DB
-	devices    map[IPAddress]*DeviceConn
-}
+type SDevicesPoint *map[IPAddress]DeviceConn
 
-func NewSService(addr string, routerList map[string]routerDI.CallbackJSONFunc, dbobj *sql.DB) *SService {
+func NewSService(addr string, routerList routerDI.MapOfCallbackJSONFunc, dbobj *sql.DB) *SService {
 	return &SService{
 		addr:       addr,
 		routerList: routerList,
@@ -38,6 +40,10 @@ func NewSService(addr string, routerList map[string]routerDI.CallbackJSONFunc, d
 
 func (s *SService) Devices() map[IPAddress]*DeviceConn {
 	return s.devices
+}
+
+func (s *SService) PDevices() *map[IPAddress]*DeviceConn {
+	return &s.devices
 }
 
 func (s *SService) StartService() {
@@ -56,10 +62,10 @@ func (s *SService) StartService() {
 		}
 		fmt.Println("connect:" + tconn.RemoteAddr().String())
 		var tempIP IPAddress = IPAddress(strings.Split(tconn.RemoteAddr().String(), ":")[0])
-		if s.devices[tempIP] != nil {
+		if s.Devices()[tempIP] != nil {
 
 		}
-		s.devices[tempIP] = &DeviceConn{
+		s.Devices()[tempIP] = &DeviceConn{
 			ipAddress:    string(tempIP),
 			conn:         &tconn,
 			isConnecting: "true",
@@ -77,7 +83,7 @@ func (s *SService) StartService() {
 
 func handleConnection(conn net.Conn, s *SService) {
 
-	frouterDI := routerDI.InitRouter(conn, s.routerList, s.db)
+	frouterDI := routerDI.InitRouter(&conn, s.routerList, s.db)
 	buffer := make([]byte, 2048)
 
 	for {
