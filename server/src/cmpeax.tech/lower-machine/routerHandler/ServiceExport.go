@@ -82,6 +82,13 @@ func ServiceExport() routerDI.MapOfCallbackJSONFunc {
 
 			conn.Write([]byte(DataParser.ParserToGbk(string(jsonBytes))))
 		},
+		"0x04": func(jsondata map[string]interface{}, conn net.Conn, db *sql.DB) {
+			for key, value := range jsondata {
+				fmt.Println("key:", key, "value:", value)
+			}
+
+			fmt.Println("OK!")
+		},
 		"0x05": func(jsondata map[string]interface{}, conn net.Conn, db *sql.DB) {
 			for key, value := range jsondata {
 				fmt.Println("key:", key, "value:", value)

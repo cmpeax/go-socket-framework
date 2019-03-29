@@ -12,10 +12,12 @@ import (
 )
 
 type SService struct {
-	addr       string
-	routerList routerDI.MapOfCallbackJSONFunc
-	db         *sql.DB
-	devices    map[IPAddress]*DeviceConn
+	addr        string
+	routerList  routerDI.MapOfCallbackJSONFunc
+	wrouterList routerDI.MapOfWSCallbackJSONFunc
+	db          *sql.DB
+	devices     map[IPAddress]*DeviceConn
+	RequestOfWS chan routerDI.Message
 }
 
 type DeviceConn struct {
@@ -29,13 +31,16 @@ type IPAddress string
 
 type SDevicesPoint *map[IPAddress]DeviceConn
 
-func NewSService(addr string, routerList routerDI.MapOfCallbackJSONFunc, dbobj *sql.DB) *SService {
+func NewSService(addr string, routerList routerDI.MapOfCallbackJSONFunc, wrouterList routerDI.MapOfWSCallbackJSONFunc, dbobj *sql.DB) *SService {
 	return &SService{
-		addr:       addr,
-		routerList: routerList,
-		db:         dbobj,
-		devices:    map[IPAddress]*DeviceConn{},
+		addr:        addr,
+		routerList:  routerList,
+		wrouterList: wrouterList,
+		db:          dbobj,
+		devices:     map[IPAddress]*DeviceConn{},
+		RequestOfWS: make(chan routerDI.Message),
 	}
+
 }
 
 func (s *SService) Devices() map[IPAddress]*DeviceConn {
@@ -52,6 +57,8 @@ func (s *SService) StartService() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go s.HandleWebSocketTransmit()
 
 	defer listener.Close() //关闭监听的端口
 	for {
@@ -78,7 +85,41 @@ func (s *SService) StartService() {
 		}
 
 		go handleConnection(tconn, s)
+
 	}
+}
+
+func (s *SService) HandleWebSocketTransmit() {
+
+	fmt.Println("开始监听")
+	for {
+		getMsg := <-s.RequestOfWS
+
+		s.StartWSMatchJson(getMsg)
+
+	}
+}
+
+func (s *SService) StartWSMatchJson(msg routerDI.Message) {
+	wsfrouterDI := routerDI.InitWSRouter(s.wrouterList, s.db)
+
+	devicePoint := s.Devices()
+	tempMsgIp := IPAddress(msg.Ip)
+	fmt.Println("得到的地址" + msg.Ip)
+
+	for item := range devicePoint {
+		fmt.Println("\n item:" + item)
+	}
+	if devicePoint[tempMsgIp] != nil {
+		for key, callback := range wsfrouterDI.WSGetRouterList() {
+			if msg.Code == key {
+				fmt.Printf("match: %s\n", key)
+				callback(msg, *devicePoint[tempMsgIp].conn)
+			}
+
+		}
+	}
+
 }
 
 func handleConnection(conn net.Conn, s *SService) {

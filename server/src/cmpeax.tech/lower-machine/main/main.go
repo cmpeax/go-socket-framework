@@ -29,8 +29,8 @@ func main() {
 
 	addr := ":3972"
 	wsaddr := ":5000"
-	sS := SService.NewSService(addr, container.Get(), db) //表示监听本地所有ip的8080端口，也可以这样写：addr := ":8080"
-	wsS := WSService.NewWSService(wsaddr, wscontainer.Get(), db, sS.PDevices())
+	sS := SService.NewSService(addr, container.Get(), wscontainer.Get(), db) //表示监听本地所有ip的8080端口，也可以这样写：addr := ":8080"
+	wsS := WSService.NewWSService(wsaddr, db, sS)
 	go wsS.StartWService()
 	sS.StartService()
 }

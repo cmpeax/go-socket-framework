@@ -8,7 +8,7 @@ import (
 )
 
 type CallbackJSONFunc func(jsonData map[string]interface{}, conn net.Conn, db *sql.DB)
-type WSCallbackJSONFunc func(jsonData Message)
+type WSCallbackJSONFunc func(jsonData Message, conn net.Conn)
 
 type MapOfCallbackJSONFunc map[string]CallbackJSONFunc
 type MapOfWSCallbackJSONFunc map[string]WSCallbackJSONFunc
@@ -49,6 +49,10 @@ func InitWSRouter(matchList MapOfWSCallbackJSONFunc, dbobj *sql.DB) *WSRouter {
 	}
 }
 
+func (r *WSRouter) WSGetRouterList() MapOfWSCallbackJSONFunc {
+	return r.matchList
+}
+
 // startMatchJson
 func (r *Router) StartMatchJson(matchCodeStr string) {
 	var dat map[string]interface{}
@@ -61,18 +65,5 @@ func (r *Router) StartMatchJson(matchCodeStr string) {
 		}
 	} else {
 		fmt.Println(err)
-	}
-}
-
-// startWSMatchJson'
-
-func (r *WSRouter) StartWSMatchJson(msg Message) {
-
-	for key, callback := range r.matchList {
-		if msg.Code == key {
-			fmt.Printf("match: %s\n", key)
-			callback(msg)
-		}
-
 	}
 }

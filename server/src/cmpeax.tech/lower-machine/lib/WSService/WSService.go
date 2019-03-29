@@ -14,23 +14,22 @@ import (
 )
 
 type WSService struct {
-	clients       map[*websocket.Conn]bool
-	broadcast     chan routerDI.Message
-	upgrader      *websocket.Upgrader
-	addr          string
-	routerList    routerDI.MapOfWSCallbackJSONFunc
-	socketDevices *map[SService.IPAddress]*SService.DeviceConn //socket设备指针
-	db            *sql.DB
+	clients   map[*websocket.Conn]bool
+	broadcast chan routerDI.Message
+	upgrader  *websocket.Upgrader
+	addr      string
+
+	ssConn *SService.SService //socket设备指针
+	db     *sql.DB
 }
 
-func NewWSService(addr string, routerList routerDI.MapOfWSCallbackJSONFunc, dbobj *sql.DB, socketDevices *map[SService.IPAddress]*SService.DeviceConn) *WSService {
+func NewWSService(addr string, dbobj *sql.DB, ssConn *SService.SService) *WSService {
 	return &WSService{
-		addr:          addr,
-		routerList:    routerList,
-		db:            dbobj,
-		socketDevices: socketDevices,
-		clients:       make(map[*websocket.Conn]bool), // connected clients
-		broadcast:     make(chan routerDI.Message),    // broadcast channel
+		addr:      addr,
+		db:        dbobj,
+		ssConn:    ssConn,
+		clients:   make(map[*websocket.Conn]bool), // connected clients
+		broadcast: make(chan routerDI.Message),    // broadcast channel
 		// Configure the upgrader
 		upgrader: &websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -50,6 +49,7 @@ func (wss *WSService) StartWService() {
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
+
 }
 
 func (wss *WSService) handleConnections(w http.ResponseWriter, r *http.Request) {
@@ -74,10 +74,6 @@ func (wss *WSService) handleConnections(w http.ResponseWriter, r *http.Request) 
 			delete(wss.clients, ws)
 			break
 		}
-		fmt.Println(string(msg.Code))
-		fmt.Println(string(msg.Ip))
-		fmt.Println(string(msg.DeviceID))
-		fmt.Println(string(msg.Data))
 
 		// Send the newly received message to the broadcast channel
 		wss.broadcast <- msg
@@ -85,7 +81,6 @@ func (wss *WSService) handleConnections(w http.ResponseWriter, r *http.Request) 
 }
 
 func (wss *WSService) handleMessages() {
-	wsfrouterDI := routerDI.InitWSRouter(wss.routerList, wss.db)
 
 	for {
 		// Grab the next message from the broadcast channel
@@ -93,7 +88,7 @@ func (wss *WSService) handleMessages() {
 		msg := <-wss.broadcast
 		fmt.Println("outputstring")
 		fmt.Println(msg.Code)
-		wsfrouterDI.StartWSMatchJson(msg)
+		wss.ssConn.RequestOfWS <- msg
 
 		// 转发
 		// for client := range wss.clients {
