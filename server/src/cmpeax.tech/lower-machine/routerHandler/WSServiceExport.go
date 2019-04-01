@@ -12,9 +12,7 @@ import (
 
 func WSServiceExport() routerDI.MapOfWSCallbackJSONFunc {
 	return routerDI.MapOfWSCallbackJSONFunc{
-
 		"0x03": func(jsonData routerDI.Message, conn net.Conn) {
-
 			m := ACS.NewACS0x03("123456")
 			m.Code = "0x03"
 
